@@ -1,8 +1,11 @@
 package com.tioeun.a20191114_okhttp
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import com.tioeun.a20191114_okhttp.utils.ServerUtil
 import kotlinx.android.synthetic.main.activity_login.*
+import org.json.JSONObject
 
 class LoginActivity : BaseActivity() {
 
@@ -21,7 +24,22 @@ class LoginActivity : BaseActivity() {
         loginBtn.setOnClickListener {
             var inputId = idEdt.text.toString()
             var inputPw = pwEdt.text.toString()
-            ServerUtil.postRequestLogin(mContext, inputId, inputPw, null)
+            ServerUtil.postRequestLogin(mContext, inputId, inputPw, object: ServerUtil.JonResponseHandler{
+                override fun onResponse(json: JSONObject) {
+                    runOnUiThread {
+                        Log.d("액티비티에서 보는 응답", json.toString())
+
+                        var code = json.getInt("code")
+                        if(code == 400) {
+                            val message = json.getString("message")
+                            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show()
+                        } else if(code == 200) {
+                            Toast.makeText(mContext, "로그인 성공", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+            })
         }
     }
 
